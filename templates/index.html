@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Traffic Sign Detection</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #222;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .input-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .box {
+            border: 2px dashed #bbb;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .box h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        input[type="file"] {
+            margin: 15px 0;
+        }
+
+        button {
+            border: none;
+            padding: 12px 22px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            margin: 5px;
+        }
+
+        .primary-btn {
+            background: #2563eb;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .camera-btn {
+            background: #16a34a;
+            color: white;
+        }
+
+        .capture-btn {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .stop-btn {
+            background: #dc2626;
+            color: white;
+        }
+
+        video {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 10px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        canvas {
+            display: none;
+        }
+
+        #preview {
+            max-width: 400px;
+            width: 100%;
+            margin-top: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .result h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #222;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .result-box {
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8fafc;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .result-box h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .result-box p {
+            font-size: 18px;
+            font-weight: bold;
+            color: #222;
+        }
+
+        .solution {
+            margin-top: 20px;
+            padding: 20px;
+            background: #eff6ff;
+            border-left: 5px solid #2563eb;
+            border-radius: 8px;
+        }
+
+        .solution h3 {
+            margin-bottom: 8px;
+            color: #1e40af;
+        }
+
+        .solution p {
+            font-size: 17px;
+            color: #333;
+        }
+
+        .high {
+            color: #dc2626 !important;
+        }
+
+        .medium {
+            color: #d97706 !important;
+        }
+
+        .low {
+            color: #16a34a !important;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        .error {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: #fee2e2;
+            color: #991b1b;
+            border-radius: 8px;
+        }
+
+        @media(max-width: 700px) {
+
+            .input-section {
+                grid-template-columns: 1fr;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+        <h1>🚦 Traffic Sign Board Detection</h1>
+
+        <p>
+            Traffic Sign Classification with Data Augmentation
+        </p>
+
+    </div>
+
+
+    <div class="main-card">
+
+        <!-- INPUT SECTION -->
+
+        <div class="input-section">
+
+
+            <!-- UPLOAD -->
+
+            <div class="box">
+
+                <h2>📁 Upload Image</h2>
+
+                <p>Select a traffic sign image</p>
+
+                <input
+                    type="file"
+                    id="fileInput"
+                    accept="image/*"
+                >
+
+                <br>
+
+                <button
+                    class="primary-btn"
+                    onclick="predictUploadedImage()">
+
+                    Detect Sign
+
+                </button>
+
+                <br>
+
+                <img
+                    id="preview"
+                    alt="Image Preview"
+                >
+
+            </div>
+
+
+            <!-- CAMERA -->
+
+            <div class="box">
+
+                <h2>📷 Camera</h2>
+
+                <p>Capture a traffic sign</p>
+
+                <video
+                    id="video"
+                    autoplay>
+                </video>
+
+                <canvas id="canvas"></canvas>
+
+                <br>
+
+                <button
+                    class="camera-btn"
+                    onclick="startCamera()">
+
+                    Start Camera
+
+                </button>
+
+                <button
+                    class="capture-btn"
+                    onclick="captureImage()">
+
+                    Capture
+
+                </button>
+
+                <button
+                    class="stop-btn"
+                    onclick="stopCamera()">
+
+                    Stop
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- LOADING -->
+
+        <div
+            class="loading"
+            id="loading">
+
+            🔍 Detecting traffic sign...
+
+        </div>
+
+
+        <!-- ERROR -->
+
+        <div
+            class="error"
+            id="error">
+        </div>
+
+
+        <!-- RESULT -->
+
+        <div
+            class="result"
+            id="result">
+
+            <h2>Detection Result</h2>
+
+
+            <div class="result-grid">
+
+
+                <!-- SIGN -->
+
+                <div class="result-box">
+
+                    <h3>🚦 Traffic Sign</h3>
+
+                    <p id="signLabel">
+                        -
+                    </p>
+
+                </div>
+
+
+                <!-- CONFIDENCE -->
+
+                <div class="result-box">
+
+                    <h3>🎯 Confidence</h3>
+
+                    <p id="confidence">
+                        -
+                    </p>
+
+                </div>
+
+
+                <!-- RISK -->
+
+                <div class="result-box">
+
+                    <h3>⚠️ Risk Level</h3>
+
+                    <p id="risk">
+                        -
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- SOLUTION -->
+
+            <div class="solution">
+
+                <h3>
+                    💡 Suggested Action
+                </h3>
+
+                <p id="solution">
+                    -
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+let video = document.getElementById("video");
+
+let canvas = document.getElementById("canvas");
+
+let stream = null;
+
+
+// ============================================================
+// FILE UPLOAD PREVIEW
+// ============================================================
+
+document
+    .getElementById("fileInput")
+    .addEventListener("change", function(event) {
+
+        const file = event.target.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+
+            const preview =
+                document.getElementById("preview");
+
+            preview.src = e.target.result;
+
+            preview.style.display = "block";
+
+        };
+
+        reader.readAsDataURL(file);
+
+    });
+
+
+// ============================================================
+// UPLOAD IMAGE
+// ============================================================
+
+async function predictUploadedImage() {
+
+    const file =
+        document.getElementById("fileInput").files[0];
+
+    if (!file) {
+
+        showError("Please select an image first.");
+
+        return;
+
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = async function(e) {
+
+        await sendImageToServer(e.target.result);
+
+    };
+
+    reader.readAsDataURL(file);
+
+}
+
+
+// ============================================================
+// START CAMERA
+// ============================================================
+
+async function startCamera() {
+
+    try {
+
+        stream =
+            await navigator.mediaDevices.getUserMedia({
+                video: true
+            });
+
+        video.srcObject = stream;
+
+        video.style.display = "block";
+
+    }
+    catch(error) {
+
+        showError(
+            "Could not access camera. Please allow camera permission."
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// CAPTURE IMAGE
+// ============================================================
+
+async function captureImage() {
+
+    if (!stream) {
+
+        showError(
+            "Please start the camera first."
+        );
+
+        return;
+
+    }
+
+    canvas.width = video.videoWidth;
+
+    canvas.height = video.videoHeight;
+
+    const context =
+        canvas.getContext("2d");
+
+    context.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    const imageData =
+        canvas.toDataURL("image/jpeg");
+
+    await sendImageToServer(imageData);
+
+}
+
+
+// ============================================================
+// STOP CAMERA
+// ============================================================
+
+function stopCamera() {
+
+    if (stream) {
+
+        stream
+            .getTracks()
+            .forEach(track => track.stop());
+
+        stream = null;
+
+        video.srcObject = null;
+
+        video.style.display = "none";
+
+    }
+
+}
+
+
+// ============================================================
+// SEND IMAGE TO FLASK
+// ============================================================
+
+async function sendImageToServer(imageData) {
+
+    hideError();
+
+    showLoading();
+
+    try {
+
+        const response =
+            await fetch("/predict", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    image: imageData
+                })
+
+            });
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.error || "Prediction failed."
+            );
+
+        }
+
+
+        // Display result
+
+        document.getElementById("signLabel")
+            .textContent = result.label;
+
+
+        document.getElementById("confidence")
+            .textContent =
+            result.confidence + "%";
+
+
+        const riskElement =
+            document.getElementById("risk");
+
+        riskElement.textContent =
+            result.risk_level;
+
+
+        // Remove previous classes
+
+        riskElement.classList.remove(
+            "high",
+            "medium",
+            "low"
+        );
+
+
+        // Add risk class
+
+        if (result.risk_level === "HIGH") {
+
+            riskElement.classList.add("high");
+
+        }
+        else if (result.risk_level === "MEDIUM") {
+
+            riskElement.classList.add("medium");
+
+        }
+        else {
+
+            riskElement.classList.add("low");
+
+        }
+
+
+        document.getElementById("solution")
+            .textContent = result.solution;
+
+
+        document.getElementById("result")
+            .style.display = "block";
+
+
+    }
+    catch(error) {
+
+        showError(
+            error.message
+        );
+
+    }
+    finally {
+
+        hideLoading();
+
+    }
+
+}
+
+
+// ============================================================
+// LOADING
+// ============================================================
+
+function showLoading() {
+
+    document.getElementById("loading")
+        .style.display = "block";
+
+}
+
+
+function hideLoading() {
+
+    document.getElementById("loading")
+        .style.display = "none";
+
+}
+
+
+// ============================================================
+// ERROR
+// ============================================================
+
+function showError(message) {
+
+    const error =
+        document.getElementById("error");
+
+    error.textContent = message;
+
+    error.style.display = "block";
+
+}
+
+
+function hideError() {
+
+    document.getElementById("error")
+        .style.display = "none";
+
+}
+
+</script>
+
+
+</body>
+
+</html>
