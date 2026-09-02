@@ -34,8 +34,8 @@ The project uses the **German Traffic Sign Recognition Benchmark (GTSRB)** datas
 - JavaScript
 
 ## 📂 Project Structure
-
-traffic_signB/
+```text
+Traffic_SignBoard_Prediction/
 │
 ├── app.py
 ├── main.py
@@ -46,12 +46,11 @@ traffic_signB/
 ├── templates/
 │   └── index.html
 │
-├── train/
-├── test/
-├── dataset/
-│
-├── traffic_sign_model.h5
-└── venv/
+└── results/
+    ├── Accuracy_Validation.png
+    └── Confusion_Matrix.png
+
+
 ## 📊 Results
 
 ### Training Accuracy and Validation Accuracy
