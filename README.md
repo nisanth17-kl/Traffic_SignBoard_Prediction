@@ -52,3 +52,14 @@ traffic_signB/
 │
 ├── traffic_sign_model.h5
 └── venv/
+
+## 📊 Results
+
+
+### Training Accuracy and Validation Accuracy
+
+![Accuracy Graph](results/accuracy.png)
+
+### Confusion Matrix
+
+![Confusion Matrix](results/confusion_matrix.png)
