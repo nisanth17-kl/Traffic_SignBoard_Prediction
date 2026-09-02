@@ -55,7 +55,6 @@ traffic_signB/
 
 ## 📊 Results
 
-
 ### Training Accuracy and Validation Accuracy
 
 ![Accuracy Graph](results/accuracy.png)
